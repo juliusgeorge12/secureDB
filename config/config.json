@@ -1,0 +1,61 @@
+{
+        "debug_mode": 4 ,
+
+        "prepared_statement_enabled" : false ,
+
+        "log_path": " " ,
+
+        "default_log_path": "{ROOT}/log",
+
+        "action_log_format" : "text" ,
+        
+        "driver" : "mysql" ,
+
+        "default_driver": "mysql" ,
+
+        "connections" : 
+        [
+            {
+                "default": {
+
+                        "host" : "127.0.0.1" ,
+
+                        "port": 3360 ,
+
+                        "db_password" : " " ,
+
+                        "db_username": "root" ,
+
+                        "db_name" : "test_database"
+
+                },
+                "read" :  {
+
+                        "host" : "127.0.0.1" ,
+
+                        "port": 3360 ,
+
+                        "db_password" : " " ,
+
+                        "db_username": "root" ,
+
+                        "db_name" : "test_database"
+
+                 } ,
+                 "write" : {
+
+                        "host" : "127.0.0.1" ,
+
+                        "port": 3360 ,
+
+                        "db_password" : " " ,
+
+                        "db_username": "root" ,
+
+                        "db_name" : "test_database"
+                 }
+            
+            } 
+        ]
+
+}

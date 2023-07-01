@@ -1,0 +1,19 @@
+{
+    "name": "julius-george/secure-db",
+    "description": "secureDB is an orm (object relation mapper) for managing and using multiple database connection and for handling sql queries, it enable developer to create applications that are free from sql injection, it takes away the worries regarding building sql-inject free web application",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "SecureDB\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "julius george",
+            "email": "julius.business12@gmail.com"
+        }
+    ],
+    "minimum-stability": "beta",
+    "require": {}
+}
