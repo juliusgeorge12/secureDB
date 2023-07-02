@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'SecureDB\\' => array($baseDir . '/src'),
+    'secureDB\\' => array($baseDir . '/src'),
 );

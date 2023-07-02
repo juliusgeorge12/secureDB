@@ -1,7 +1,9 @@
 <?php
  namespace secureDB\container;
 
- use secureDB\contracts\Container\container as ContainerContract;
+use Closure;
+use Exception;
+use secureDB\contracts\Container\container as ContainerContract;
 
  /**
    * 
@@ -151,10 +153,119 @@
               {
                 //check if the abstract exists or has been 
                 // bound to the container
-                if(isset($this->bindings[$abstract]))
+                if($this->bound([$abstract]))
                 {
-
+                   return $this->bindings[$abstract]["concrete"];
                 }
+                throw new Exception("the abstract $abstract does not exist/has not been bound to the container");
               }
+
+              /**
+               * bind an abstract to the container
+               * 
+               */
+
+               public function bind($abstract, $concrete = null , $shared = false)
+               {
+                 // throw an Exception if the abstract has already been bound
+                 if($this->bound($abstract)){
+                        throw "the abstract {$abstract} has alreay been bind to the container";
+                 }
+                 //check if the concrete is null if yes/true
+                 // it means the abstract is also the closure
+                 if(is_null($concrete)){
+                        $concrete = $abstract;
+                 }
+
+                 //check if the concrete is not a closure if true
+                 //return a closure
+
+                 if(! $concrete instanceof Closure){
+                        //check if the concrete is a string if not
+                        // throw an TppeError b
+                        if(!is_string($concrete)){
+
+                        }
+                 }
+
+               }
+
+               /**
+                * bind a shared abstract to the container 
+                *
+                */
+
+                public function singleton($abstract , $concrete = null)
+                {
+                        $this->bind($abstract , $concrete , true);
+                }
+
+               /**
+                *  return an instance of an abstract
+                * @param $abtract the abstract to resolve
+                * @param $parameters list of parameters to be 
+                * pass as an argument to the instance
+                * @return mix
+                */
+
+                public function make($abstract, $parameters)
+                {
+                        
+                }
+
+               /**
+                *  resolve a concrete
+                * 
+                */
+
+                public function resolve($abstract , $parameters)
+                {
+                    return '';
+                }
+
+                /**
+                 * 
+                 * check if the abstract exist in the container
+                 * @param $id the abstract to check
+                 */
+
+                 public function has($id)
+                 {
+                        
+                 }
+
+                 /**
+                  * return the instance of the abstract
+                  * @param $abstract 
+                  *
+                  */
+
+                 public function get($id)
+                 {
+                        
+                 }
+            
+                /**
+                 * set and return the container instance
+                 * 
+                 */
+                public static function set_instance(ContainerContract $container)
+                {
+                        return static::$instance = $container;
+                }
+
+                /**
+                 * return the container instance
+                 * 
+                 */
+
+                 public static function get_instance()
+                 {
+                        if(is_null(static::$instance)){
+                                static::$instance = new static;
+                        }
+                        return static::$instance;
+                 }
+
 
  }

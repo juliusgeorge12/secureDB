@@ -23,13 +23,20 @@
         */
 
         public function make($abstract , $parameters);
+       
+        /**
+        * resolve the abstract
+        * 
+        */
+
+        public function resolve($abstract , $parameters);
 
         /**
          * register a binding to the container
          * 
          */
 
-         public function bind($abstract , $concrete);
+         public function bind($abstract , $concrete = null, $shared = true);
 
         /**
          * check if the supplied string is an alias
@@ -57,7 +64,7 @@
          * 
          */
 
-         public function singleton($abstract);
+         public function singleton($abstract , $concrete);
 
          /**
           * return a concrete or binding for an abstract type
@@ -72,14 +79,14 @@
          * 
          */
 
-         public function set_instance(container $container);
+         public static function set_instance(container $container);
 
          /**
           * get the container instance 
           *
           */
         
-         public function get_instance();
+         public static function get_instance();
 
         
    

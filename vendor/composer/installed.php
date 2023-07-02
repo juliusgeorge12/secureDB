@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'julius-george/secure-db',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => NULL,
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => 'd02e90ebe051899aa9ee5313f0d0b06951bf4d63',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'julius-george/secure-db' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => NULL,
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'd02e90ebe051899aa9ee5313f0d0b06951bf4d63',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
