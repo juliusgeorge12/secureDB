@@ -3,6 +3,8 @@
 
 use Closure;
 use Exception;
+use ReflectionClass;
+use ReflectionException;
 use ReflectionNamedType;
 use ReflectionParameter;
 use secureDB\contracts\Container\container as ContainerContract;
@@ -255,7 +257,7 @@ use TypeError;
                 * 
                 */
 
-                public function resolve($abstract , $parameters)
+                public function resolve($abstract , $parameters = [])
                 {
                   // check the alias , the get_abstract method will
                   // check if the abstract is an alias or an abstract
@@ -300,6 +302,71 @@ use TypeError;
                    return $object;
 
                 }
+
+                /**
+                 * build the concrete
+                 * 
+                 * @param mixed $concrete
+                 *
+                 * @return mixed
+                 */
+
+                 protected function build($concrete) 
+                 {
+                    // if the type is a closure we call the
+                    // function and pass the container to it as
+                    // an argument so it can be used to resolve 
+                    // more object
+                    if($concrete instanceof Closure){
+                      return $concrete($this);
+                    }
+
+                    try {
+                     // if it is a class or an interface,
+                     // we are going to use the built-in
+                     // ReflectionClass object to automatically
+                     // resolve it and it's dependencies and
+                     // inject it into it.
+                      $reflector = new ReflectionClass($concrete);
+                    } catch(ReflectionException $e){
+                     throw new Exception("Target class [$concrete] does not exist");
+                    }
+
+                    // check if the type is not instantiable and throw 
+                    // an exception if it is not instantiable
+                    if(!$reflector->isInstantiable()){
+                     throw new Exception("the type [$concrete] can not be instantiated");
+                    }
+
+                    // get the constructor of the class
+                    // it will return null if there is no 
+                    // constructor
+                    $constructor = $reflector->getConstructor();
+                    
+                    // if there is no constructor
+                    // that means the class does not
+                    // have a dependency hence ,
+                    // instantaite it and return the instance
+
+                    if(is_null($constructor)){
+                      return new $concrete;
+                    }
+
+                    // get the constructor parameters
+                    $dependencies = $constructor->getParameters();
+
+                    //resolve the dependencies and return the instances
+                    try {
+                    $instances = $this->resolve_dependencies($dependencies);
+
+                    } catch(Exception $e){
+                     throw $e;
+                    }
+                    // use the newInstanceArgs method of
+                    // the reflector object to instantiate the
+                    // class injecting it's dependencies.
+                    return $reflector->newInstanceArgs($instances);
+                 }
 
                 /**
                  * resolve the dependencies pass to it.
@@ -427,7 +494,7 @@ use TypeError;
 
                  public function has($id)
                  {
-                        
+                        return $this->bound($id);
                  }
 
                  /**
@@ -438,7 +505,15 @@ use TypeError;
 
                  public function get($id)
                  {
-                        
+                        try {
+                           return $this->resolve($id);
+                        } catch(Exception $e){
+                        if ($this->has($id)){
+                           throw $e;
+                         } else {
+                           throw (new not_found_exception("the abstract [$id] does not exist"));
+                         }
+                        }
                  }
             
                 /**
