@@ -4,6 +4,12 @@
  
   interface container {
 
+        /**
+         * return all the container's bindings
+         */
+
+         public function get_bindings();
+         
        /**
         * check if the container has the type
         * 

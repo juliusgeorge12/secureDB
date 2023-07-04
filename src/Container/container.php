@@ -3,7 +3,10 @@
 
 use Closure;
 use Exception;
+use ReflectionNamedType;
+use ReflectionParameter;
 use secureDB\contracts\Container\container as ContainerContract;
+use TypeError;
 
  /**
    * 
@@ -107,7 +110,7 @@ use secureDB\contracts\Container\container as ContainerContract;
                  if($this->is_alias($abstract)){
                         $abstract = $this->get_abstract($abstract);
                  }
-                 return (in_array($this->resolved , $abstract) ||
+                 return (in_array($abstract , $this->resolved) ||
                       isset($this->instances[$abstract]));
              }
 
@@ -144,6 +147,16 @@ use secureDB\contracts\Container\container as ContainerContract;
                        $this->is_alias($abstract));
                }
 
+            /**
+             * return all of the container's bindings 
+             *
+             */
+
+              public function get_bindings()
+              {
+                return $this->bindings;
+              }
+
              /**
               *  return the concrete for an abstract
               *
@@ -157,7 +170,7 @@ use secureDB\contracts\Container\container as ContainerContract;
                 {
                    return $this->bindings[$abstract]["concrete"];
                 }
-                throw new Exception("the abstract $abstract does not exist/has not been bound to the container");
+                throw new not_found_exception("the abstract $abstract does not exist/has not been bound to the container");
               }
 
               /**
@@ -184,9 +197,14 @@ use secureDB\contracts\Container\container as ContainerContract;
                         //check if the concrete is a string if not
                         // throw an TppeError b
                         if(!is_string($concrete)){
-
+                           throw new TypeError(self::class . '::bind(): Argument #2 ($concrete) must be of type Closure|string|null');
                         }
+                        $concrete = $this->get_closure($abstract , $concrete);
                  }
+                 //bind the abstract to the container
+                 //compact('concrete' , 'shared') does the same thing
+                 //as  ["concrete"=> $concrete , "shared" => $shared]
+                 $this->bindings[$abstract] = compact('concrete' , 'shared');
 
                }
 
@@ -208,9 +226,28 @@ use secureDB\contracts\Container\container as ContainerContract;
                 * @return mix
                 */
 
-                public function make($abstract, $parameters)
+                public function make($abstract, $parameters = [])
                 {
-                        
+                     return   $this->resolve($abstract , $parameters);
+                }
+
+               /**
+                * check if the concrete is buildable
+                *
+                * @param mixed $concrete
+                * @param string $abstract
+                * 
+                * @return bool
+                */
+
+                protected function is_buildable(mixed $concrete , string $abstract)
+                {
+                  // the concrete is buildable if the concrete 
+                  // is same type and value as the abstract 
+                  // or it is a closure
+
+                  return $concrete === $abstract || ($concrete instanceof Closure);
+                 
                 }
 
                /**
@@ -220,8 +257,167 @@ use secureDB\contracts\Container\container as ContainerContract;
 
                 public function resolve($abstract , $parameters)
                 {
-                    return '';
+                  // check the alias , the get_abstract method will
+                  // check if the abstract is an alias or an abstract
+                  // if it is an abstract it will return the 
+                  // abstract for the alias else it will return the
+                  // abstract
+                  $abstract = $this->get_abstract($abstract);
+
+                  //get the concrete to be resolve
+
+                  $concrete = $this->get_concrete($abstract);
+                  //check if the abstract is a singleton
+                  //if it is a singleton we will check if it has 
+                  //been resolve if yes, we will just return 
+                  //the cached instance
+                  if(isset($this->instances[$abstract])){
+                     return $this->instances[$abstract];
+                  }
+                  
+                  // check if the concrete is buildable
+                  // and build it if it is 
+
+                  if($this->is_buildable($concrete , $abstract)){
+                      $object = $this->build($concrete);
+                  }
+                   else {
+                     //make the concrete and build it
+                    $object = $this->make($concrete);
+                   }
+
+                   // cached the resolved concrete if
+                   // it is a shared object
+
+                   if($this->is_shared($abstract)) {
+                     $this->instances[$abstract] = $object;
+                   }
+                   // add the abstract to the 
+                   //  resolved array and return the object
+
+                   $this->resolved[] = $abstract;
+
+                   return $object;
+
                 }
+
+                /**
+                 * resolve the dependencies pass to it.
+                 * @param array $dependencies
+                 * @return array the arrray of resolved dependencies
+                 * 
+                 */
+
+                public function resolve_dependencies(array $dependencies){
+
+                  //an array to store resolved dependencies
+
+                  $results = [];
+
+                  //loop through thr array of $dependencies and resolve them
+                  //one by one
+
+                  foreach($dependencies  as $dependency){
+
+                     //get the class parameter name, if it is null
+                     //it means the dependency is a string or some other primitive type
+                     $result = is_null($this->get_class_param_name($dependency))
+                               ? $this->resolve_primitive($dependency):
+                                 $this->resolve_class($dependency);
+                   //add the result to the result array
+                     $results[] = $result;
+                  }
+                  //return the resolved dependencies
+                   return $results;
+                }
+
+                /**
+                 * get the class parameter name.
+                 * 
+                 * 
+                 */
+
+                 protected function get_class_param_name($paramter){
+                   
+                  //get the type hint of the parameter
+
+                  $type = $paramter->getType();
+
+                  //check if the type hint is an instance of 
+                  //ReflectionNamedType or is a builtin type
+                  //if true get the name and return it
+                  //else null
+
+                  if($type instanceof ReflectionNamedType || $type->isBuiltin()){
+                     return null;
+                  }
+                  //get the parameter name
+
+                  $name = $type->getName();
+
+                  //check if there is a declaring class
+                  // and get the name
+
+                  if(!($class = $name->getDeclaringClass())){
+                     if ($name === 'self') {
+                        return $class->getName();
+                    }
+        
+                    if ($name === 'parent' && $parent = $class->getParentClass()) {
+                        return $parent->getName();
+                    }
+                  }
+                   return $name;
+
+                 }
+               
+                /**
+                 * resolve a primitive type
+                 * @param \ReflectionParameter $parameter
+                 */
+
+                 protected function resolve_primitive(ReflectionParameter $parameter){
+                    
+                  try {
+                     $concrete = $this->get_concrete($parameter);
+                  } catch (not_found_exception $e){
+                      throw $e->getMessage();
+                  }
+                  //check if the concrete is an instance of closure
+                  //call it and return it if it does
+                    if ($concrete instanceof Closure){
+                      return $concrete($this);
+                      }
+                   else { 
+                    //check if there is a default value for the parameter
+                    //and return it
+                     if($parameter->isDefaultValueAvailable()){
+                        return $parameter->getDefaultValue();
+                     }
+                     throw new unresolvable("the type [$parameter] can't be resolved");
+                     }
+                  
+                }
+                 
+                /**
+                 * resolve a class hinted dependency
+                 * 
+                 * @param \ReflectionParameter $parameter
+                 * @return mixed
+                 */
+
+                 protected function resolve_class(ReflectionParameter $parameter)
+                 {
+                     try {
+                        return $this->make($this->get_class_param_name($parameter));
+                     }
+                     catch(Exception $e){
+                       if($parameter->isDefaultValueAvailable()){
+                        return $parameter->getDefaultValue();
+                       }
+                       throw $e;
+                     }
+                 }
 
                 /**
                  * 
