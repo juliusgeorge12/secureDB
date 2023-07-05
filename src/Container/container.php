@@ -74,6 +74,19 @@ use TypeError;
            }
 
            /**
+            * alias a string to an abstract 
+            * @param string $abstract
+            * @param string $alias
+            *
+            * @return object C:\project\secureDB\Tests\test.php
+            */
+
+            public function alias(string $abstract, string $alias)
+            {
+               $this->alias[$alias] = $abstract;
+            }
+
+           /**
             * check if the type is an alias 
             *
             */
@@ -92,9 +105,9 @@ use TypeError;
                 //check if the alias is present in the alias array
                 //if true  it means $alias is really an $alias
                 //therefore return the associated abstract
-                if(!isset($this->alias[$alias])){
-                        return $this->alias[$alias];
-                }
+               if(isset($this->alias[$alias])){
+                       return $this->alias[$alias];
+                     }
                 //if false this line will execute, meaning $alias is 
                 //not an alias but an abstract therefore return it
                 return $alias;
@@ -105,7 +118,7 @@ use TypeError;
              * 
              */
 
-             public function is_resolved($abstract)
+            public function is_resolved($abstract)
              {
                 //check if $abstract is an alias if true 
                 // get the abstract for the alias
@@ -123,12 +136,12 @@ use TypeError;
 
               protected function get_closure($abstract , $concrete)
               {
-                 return function($container , $parameters) use($abstract , $concrete)
+                 return function($container , $parameters = []) use($abstract , $concrete)
                  {
                      if($abstract === $concrete){
-                        return $container->build($concrete);
+                          return $container->build($concrete);
                      }
-                     return $container->resolve($abstract);
+                     return $container->resolve($abstract , $parameters);
                  };
               }
 
@@ -144,9 +157,10 @@ use TypeError;
                 // check if the abstract is in the bindings array
                 // or in the instances array
                 // or if it is an alias
-                return (isset($this->bindings[$abstract]) || 
+               return (isset($this->bindings[$abstract]) || 
                       isset($this->instances[$abstract]) ||
                        $this->is_alias($abstract));
+                       
                }
 
             /**
@@ -168,7 +182,7 @@ use TypeError;
               {
                 //check if the abstract exists or has been 
                 // bound to the container
-                if($this->bound([$abstract]))
+                if($this->bound($abstract))
                 {
                    return $this->bindings[$abstract]["concrete"];
                 }
@@ -184,7 +198,7 @@ use TypeError;
                {
                  // throw an Exception if the abstract has already been bound
                  if($this->bound($abstract)){
-                        throw "the abstract {$abstract} has alreay been bind to the container";
+                        throw new Exception("the abstract {$abstract} has alreay been bind to the container");
                  }
                  //check if the concrete is null if yes/true
                  // it means the abstract is also the closure
@@ -242,7 +256,7 @@ use TypeError;
                 * @return bool
                 */
 
-                protected function is_buildable(mixed $concrete , string $abstract)
+                protected function is_buildable($concrete , string $abstract)
                 {
                   // the concrete is buildable if the concrete 
                   // is same type and value as the abstract 
@@ -265,10 +279,11 @@ use TypeError;
                   // abstract for the alias else it will return the
                   // abstract
                   $abstract = $this->get_abstract($abstract);
-
+                  
                   //get the concrete to be resolve
-
                   $concrete = $this->get_concrete($abstract);
+
+                  
                   //check if the abstract is a singleton
                   //if it is a singleton we will check if it has 
                   //been resolve if yes, we will just return 
@@ -278,11 +293,11 @@ use TypeError;
                   }
                   
                   // check if the concrete is buildable
-                  // and build it if it is 
+                 // and build it if it is 
 
                   if($this->is_buildable($concrete , $abstract)){
                       $object = $this->build($concrete);
-                  }
+                   }
                    else {
                      //make the concrete and build it
                     $object = $this->make($concrete);
@@ -318,9 +333,10 @@ use TypeError;
                     // an argument so it can be used to resolve 
                     // more object
                     if($concrete instanceof Closure){
+                    
                       return $concrete($this);
                     }
-
+                   
                     try {
                      // if it is a class or an interface,
                      // we are going to use the built-in
@@ -342,7 +358,8 @@ use TypeError;
                     // it will return null if there is no 
                     // constructor
                     $constructor = $reflector->getConstructor();
-                    
+
+
                     // if there is no constructor
                     // that means the class does not
                     // have a dependency hence ,
@@ -355,13 +372,15 @@ use TypeError;
                     // get the constructor parameters
                     $dependencies = $constructor->getParameters();
 
+                   
                     //resolve the dependencies and return the instances
                     try {
-                    $instances = $this->resolve_dependencies($dependencies);
+                     $instances = $this->resolve_dependencies($dependencies);
 
                     } catch(Exception $e){
                      throw $e;
                     }
+                    
                     // use the newInstanceArgs method of
                     // the reflector object to instantiate the
                     // class injecting it's dependencies.
@@ -383,7 +402,6 @@ use TypeError;
 
                   //loop through thr array of $dependencies and resolve them
                   //one by one
-
                   foreach($dependencies  as $dependency){
 
                      //get the class parameter name, if it is null
@@ -391,6 +409,7 @@ use TypeError;
                      $result = is_null($this->get_class_param_name($dependency))
                                ? $this->resolve_primitive($dependency):
                                  $this->resolve_class($dependency);
+                                
                    //add the result to the result array
                      $results[] = $result;
                   }
@@ -404,34 +423,35 @@ use TypeError;
                  * 
                  */
 
-                 protected function get_class_param_name($paramter){
+                 protected function get_class_param_name($parameter){
                    
                   //get the type hint of the parameter
 
-                  $type = $paramter->getType();
+                  $type = $parameter->getType();
+                 
 
                   //check if the type hint is an instance of 
                   //ReflectionNamedType or is a builtin type
                   //if true get the name and return it
                   //else null
 
-                  if($type instanceof ReflectionNamedType || $type->isBuiltin()){
+                  if(! $type instanceof ReflectionNamedType || $type->isBuiltin()){
                      return null;
                   }
                   //get the parameter name
 
                   $name = $type->getName();
-
+                    
                   //check if there is a declaring class
                   // and get the name
 
-                  if(!($class = $name->getDeclaringClass())){
+                  if(!($class = $parameter->getDeclaringClass())){
                      if ($name === 'self') {
-                        return $class->getName();
+                          return $class->getName();
                     }
         
                     if ($name === 'parent' && $parent = $class->getParentClass()) {
-                        return $parent->getName();
+                     return $parent->getName();
                     }
                   }
                    return $name;
@@ -448,7 +468,7 @@ use TypeError;
                   try {
                      $concrete = $this->get_concrete($parameter);
                   } catch (not_found_exception $e){
-                      throw $e->getMessage();
+                      throw (new Exception($e->getMessage()));
                   }
                   //check if the concrete is an instance of closure
                   //call it and return it if it does
@@ -475,8 +495,10 @@ use TypeError;
 
                  protected function resolve_class(ReflectionParameter $parameter)
                  {
+                  
                      try {
                         return $this->make($this->get_class_param_name($parameter));
+                       
                      }
                      catch(Exception $e){
                        if($parameter->isDefaultValueAvailable()){
@@ -484,6 +506,7 @@ use TypeError;
                        }
                        throw $e;
                      }
+                     
                  }
 
                 /**
@@ -514,6 +537,7 @@ use TypeError;
                            throw (new not_found_exception("the abstract [$id] does not exist"));
                          }
                         }
+                       
                  }
             
                 /**
@@ -537,6 +561,31 @@ use TypeError;
                         }
                         return static::$instance;
                  }
+
+                 /**
+                  * flush the container from it's bindings and 
+                  * clear all cached instances, it kinda reset the
+                  * container, you might want to call this method
+                  * after your application lifecycle has ended to
+                  * free resources.
+                  */
+
+                  public function reset() 
+                  {
+                     $this->alias = [];
+                     $this->instances = [];
+                     $this->bindings = [];
+                  }
+
+                  /**
+                   * does the same thing as reset
+                   * it is an alias name for reset
+                   */
+
+                   public function flush()
+                   {
+                     $this->reset();
+                   }
 
 
  }

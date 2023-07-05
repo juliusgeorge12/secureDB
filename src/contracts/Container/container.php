@@ -51,6 +51,16 @@
 
          public function is_alias(string $name);
 
+         /**
+          * alias a string to an abstract type 
+          * @param string $abstract
+          * @param string $alias
+          *
+          * @return object
+          */
+         
+          public function alias(string $abstract , string $alias);
+
         /**
          * determine if the the given abstract has been resolved
          * 
@@ -94,6 +104,22 @@
         
          public static function get_instance();
 
+        /**
+         * flush the container from it's bindings and 
+         * clear all cached instances, it kinda reset the
+         * container, you might want to call this method
+         * after your application lifecycle has ended to
+         * free resources.
+         */
+
+         public function reset();
         
+        /**
+         * does the same thing as reset it is an alias name for reset
+         * 
+         */
+
+         public function flush();
+                  
    
   }
