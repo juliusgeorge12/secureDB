@@ -136,11 +136,26 @@ use TypeError;
 
               protected function get_closure($abstract , $concrete)
               {
+                
                  return function($container , $parameters = []) use($abstract , $concrete)
-                 {
+                 { 
                      if($abstract === $concrete){
                           return $container->build($concrete);
                      }
+                     //check if the concrete is a string
+                     if(is_string($concrete)){
+                        //get a reflection of the string
+                        try {
+                        $own_reflector = new ReflectionClass($concrete);
+                        // check if it is instantiable i.e it is a class
+                       // return an instance of the class 
+                       // if it is not a class return the string
+                      if($own_reflector->isInstantiable()){ return new $concrete; }
+
+                        } catch(Exception $e){
+                           return $concrete;
+                          }
+                        }                               
                      return $container->resolve($abstract , $parameters);
                  };
               }
@@ -243,7 +258,7 @@ use TypeError;
                 */
 
                 public function make($abstract, $parameters = [])
-                {
+                {    
                      return   $this->resolve($abstract , $parameters);
                 }
 
