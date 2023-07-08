@@ -16,7 +16,7 @@ require_once  dirname(__DIR__) . "\\vendor\\autoload.php";
         private $name = "Dog";
 
         public function message(){
-                return "this is a {$this->name}";
+                return "this is a {$this->name} \r\n";
         }
  }
 
@@ -47,15 +47,20 @@ require_once  dirname(__DIR__) . "\\vendor\\autoload.php";
  }
 class monkey implements animal_interface {
         public function message(){
-                echo "i am a monkey";
+                echo "i am a monkey";   
         }
 }
+
  $container = new container;
+  try {
  $container->bind('animal' , animal::class);
- $container->bind('dog' , dog::class);
- $container->bind('action_interface' , function($c){
-        return new dog_action;
- });
- $container->bind('animal_interface' , monkey::class);
+ $container->bind('greeting' , 'hello, how are you doing');
+ $container->bind('animal_interface' , dog::class);
+ $container->bind('action_interface' , dog_action::class);
  $container->get('animal')->action();
- //var_dump($container->get('animal_interface'));
+ echo $container->get('greeting');
+
+  } catch(Exception $e){
+        echo $e->getMessage();
+ }
+ 
