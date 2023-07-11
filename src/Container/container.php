@@ -48,17 +48,20 @@ use TypeError;
 
            private $bindings = [];
 
-           /**
-            * check if an abstract is a shared object 
-            *
-            */
-
+          
             /**
              * an array of aliases
              *  @var array [$alias => $abstract]
              */
 
              private $alias = [];
+
+             /**
+              * the parameter override stack 
+              * @var array
+              */
+            
+              private $param_override = [];
 
           /**
            * check if the abstract is a shared abstract
@@ -167,14 +170,13 @@ use TypeError;
 
                public function bound($abstract)
                {
-
                 //to check if an abstract has been bound we
                 // check if the abstract is in the bindings array
                 // or in the instances array
                 // or if it is an alias
-               return (isset($this->bindings[$abstract]) || 
-                      isset($this->instances[$abstract]) ||
-                       $this->is_alias($abstract));
+               return isset($this->bindings[$abstract]) || 
+                        isset($this->instances[$abstract]) ||
+                        $this->is_alias($abstract);
                        
                }
 
@@ -249,6 +251,7 @@ use TypeError;
                         $this->bind($abstract , $concrete , true);
                 }
 
+               
                /**
                 *  return an instance of an abstract
                 * @param $abtract the abstract to resolve
@@ -298,7 +301,6 @@ use TypeError;
                   //get the concrete to be resolve
                   $concrete = $this->get_concrete($abstract);
 
-                  
                   //check if the abstract is a singleton
                   //if it is a singleton we will check if it has 
                   //been resolve if yes, we will just return 
@@ -307,8 +309,10 @@ use TypeError;
                      return $this->instances[$abstract];
                   }
                   
+                  //add the parameters to the parameter override
+                  $this->param_override[] = $parameters;
                   // check if the concrete is buildable
-                 // and build it if it is 
+                 // and build it if it is                                              
 
                   if($this->is_buildable($concrete , $abstract)){
                       $object = $this->build($concrete);
@@ -316,8 +320,7 @@ use TypeError;
                    else {
                      //make the concrete and build it
                     $object = $this->make($concrete);
-                   }
-
+                   } 
                    // cached the resolved concrete if
                    // it is a shared object
 
@@ -328,9 +331,8 @@ use TypeError;
                    //  resolved array and return the object
 
                    $this->resolved[] = $abstract;
-
+                    array_pop($this->param_override);
                    return $object;
-
                 }
 
                 /**
@@ -342,16 +344,16 @@ use TypeError;
                  */
 
                  protected function build($concrete) 
-                 {
+                 { 
                     // if the type is a closure we call the
                     // function and pass the container to it as
                     // an argument so it can be used to resolve 
                     // more object
                     if($concrete instanceof Closure){
                     
-                      return $concrete($this);
+                      return $concrete($this , $this->get_last_parameter_override());
                     }
-                   
+                    
                     try {
                      // if it is a class or an interface,
                      // we are going to use the built-in
@@ -369,7 +371,7 @@ use TypeError;
                      throw new Exception("the type [$concrete] can not be instantiated");
                     }
 
-                    // get the constructor of the class
+                     // get the constructor of the class
                     // it will return null if there is no 
                     // constructor
                     $constructor = $reflector->getConstructor();
@@ -418,7 +420,16 @@ use TypeError;
                   //loop through thr array of $dependencies and resolve them
                   //one by one
                   foreach($dependencies  as $dependency){
+                     
+                 // If the dependency has an override for this particular build we will use
+                 // that instead as the value. Otherwise, we will continue with this run
+                 // of resolutions and let reflection attempt to determine the result.
+                    if ($this->has_parameter_override($dependency)) {
+                     
+                     $results[] = $this->get_parameter_override($dependency);
 
+                       continue;
+                      }
                      //get the class parameter name, if it is null
                      //it means the dependency is a string or some other primitive type
                      $result = is_null($this->get_class_param_name($dependency))
@@ -481,7 +492,9 @@ use TypeError;
                  protected function resolve_primitive(ReflectionParameter $parameter){
                     
                   try {
-                     $concrete = $this->get_concrete($parameter);
+                    
+                     $concrete = $this->get_concrete($parameter->getName());
+                     
                   } catch (not_found_exception $e){
                       throw (new Exception($e->getMessage()));
                   }
@@ -523,6 +536,43 @@ use TypeError;
                      }
                      
                  }
+
+            /**
+             * Determine if the given dependency has a parameter override.
+             *
+             * @param  \ReflectionParameter  $dependency
+             * @return bool
+             */
+             protected function has_parameter_override($dependency)
+            {
+               return array_key_exists(
+                $dependency->name, $this->get_last_parameter_override()
+              );
+           }
+
+               /**
+                * Get a parameter override for a dependency.
+                *
+                * @param  \ReflectionParameter  $dependency
+                * @return mixed
+              */
+    
+              protected function get_parameter_override($dependency)
+              {
+                return $this->get_last_parameter_override()[$dependency->name];
+                }
+
+
+                 /**
+                  * get the last parameter override 
+                  * 
+                  * @return mixed
+                  */
+
+                  protected function get_last_parameter_override()
+                  {
+                     return count($this->param_override) ? end($this->param_override) : [];
+                  }
 
                 /**
                  * 

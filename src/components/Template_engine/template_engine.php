@@ -126,7 +126,7 @@ use secureDB\contracts\TemplateEngine\Template_engine as TemplateEngineContract;
          public function get(string $template, $bindings = [])
          {
                 if(!$this->exists($template)){
-                        throw new Exception("the template [{$template}] does not exist int the engine");
+                        throw new Exception("the template [{$template}] does not exist in the engine");
                 }
                 //get the template
                 $template = $this->template[$template];

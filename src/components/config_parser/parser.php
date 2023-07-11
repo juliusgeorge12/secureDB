@@ -31,6 +31,11 @@ use Exception;
         
          protected  function  fetch_config_file()
           {
+               $len = strlen($this->path);
+               if(substr($this->path , $len - 1) != "/")
+               {
+                $this->path .= "/"; 
+               }
                 $file = $this->path . "config.json";
               if(!file_exists($file)){
                 throw new Exception("The configuration file is missing, the file [$file] is missing");
@@ -62,5 +67,13 @@ use Exception;
                         throw new Exception("the entry [$id] is not found, seems it is not in the json file");
                 }
                 return $this->parsed[$id];
+            }
+            /**
+             * return the configurations
+             * 
+             */
+            public function get_configurations()
+            {
+                return $this->parsed;
             }
  }
