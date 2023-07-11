@@ -7,6 +7,7 @@ use secureDB\contracts\TemplateEngine\Template_engine as TemplateEngineContract;
 /**
  * The template engine
  * 
+ * @author Julius George <julius.george.hack@gmail.com>
  */
  class template_engine implements TemplateEngineContract {
    
@@ -126,7 +127,7 @@ use secureDB\contracts\TemplateEngine\Template_engine as TemplateEngineContract;
          public function get(string $template, $bindings = [])
          {
                 if(!$this->exists($template)){
-                        throw new Exception("the template [{$template}] does not exist int the engine");
+                        throw new Exception("the template [{$template}] does not exist in the engine");
                 }
                 //get the template
                 $template = $this->template[$template];

@@ -3,6 +3,11 @@ namespace secureDB\components\config_parser;
 
 use Exception;
 
+/**
+ * @author Julius George <julius.george.hack@gmail.com>
+ * 
+ */
+
  class parser {
 
         /**
@@ -31,6 +36,8 @@ use Exception;
         
          protected  function  fetch_config_file()
           {
+             $this->path = (substr($this->path , strlen($this->path) - 1) != '/')
+                          ? $this->path . '/' : $this->path;
                 $file = $this->path . "config.json";
               if(!file_exists($file)){
                 throw new Exception("The configuration file is missing, the file [$file] is missing");
@@ -46,9 +53,9 @@ use Exception;
            protected function parse()
            {
                 $json = $this->fetch_config_file();
-                $this->parsed = json_decode($json);
+                $this->parsed = json_decode($json , true);
                 if(!$this->parsed){
-                        throw new Exception("the config.json file in [{$this->path} is not a valid json file]");
+                        throw new Exception("the config.json file in [{$this->path}] is not a valid json file");
                 }
            }
 
@@ -58,9 +65,17 @@ use Exception;
             */
             public function get($id)
             {  
-                 if(!method_exists($this->parsed, $id)){
+                  if(!isset($this->parsed[$id])){
                         throw new Exception("the entry [$id] is not found, seems it is not in the json file");
                 }
-                return $this->parsed->$id;
+                return $this->parsed[$id];
+            }
+            /**
+             * return the configurations
+             * 
+             */
+            public function get_configurations()
+            {
+                return $this->parsed;
             }
  }

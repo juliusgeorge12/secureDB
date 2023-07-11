@@ -1,6 +1,10 @@
 <?php
   namespace secureDB\contracts\TemplateEngine;
 
+  /**
+   *  
+   * @author julius George <julius.george.hack@gmail.com>
+   */
   interface Template_engine {
 
         /**
