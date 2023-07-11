@@ -13,6 +13,7 @@ use TypeError;
  /**
    * 
    * this is the IoC conatiner for resolving dependencies
+   * @author Julius George <julius.george.hack@gmail.com>
    */
  class container implements ContainerContract {
 

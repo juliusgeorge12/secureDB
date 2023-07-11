@@ -11,7 +11,7 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
  *  This is where all the core components of the 
  * application is loaded and all dependencies 
  * registered
- * 
+ *  @author julius George <julius.george.hack@gmail.com>
  * _______________________________________________
  */
 
@@ -28,7 +28,7 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
       *
       * @var string 
       */
-     private $config_path = '{ROOT}/config';
+     private $config_path = '{ROOT}/config/';
 
      /**
       * an instance of the dependency injection

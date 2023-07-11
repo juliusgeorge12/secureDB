@@ -3,6 +3,11 @@ namespace secureDB\components\config_parser;
 
 use Exception;
 
+/**
+ * @author Julius George <julius.george.hack@gmail.com>
+ * 
+ */
+
  class parser {
 
         /**
@@ -31,11 +36,8 @@ use Exception;
         
          protected  function  fetch_config_file()
           {
-               $len = strlen($this->path);
-               if(substr($this->path , $len - 1) != "/")
-               {
-                $this->path .= "/"; 
-               }
+             $this->path = (substr($this->path , strlen($this->path) - 1) != '/')
+                          ? $this->path . '/' : $this->path;
                 $file = $this->path . "config.json";
               if(!file_exists($file)){
                 throw new Exception("The configuration file is missing, the file [$file] is missing");

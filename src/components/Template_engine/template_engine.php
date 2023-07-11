@@ -7,6 +7,7 @@ use secureDB\contracts\TemplateEngine\Template_engine as TemplateEngineContract;
 /**
  * The template engine
  * 
+ * @author Julius George <julius.george.hack@gmail.com>
  */
  class template_engine implements TemplateEngineContract {
    
