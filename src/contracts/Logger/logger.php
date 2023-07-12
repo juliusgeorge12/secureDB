@@ -11,14 +11,16 @@
         /**
          *  log an error to the error;
          * 
+         * @param string $log_text the log text
          */
-        public function log_error(): void;
+        public function log_error($log_text): void;
 
         /**
          * log an action to the 
          * 
+         * @param string $log_text the log text
          */
 
-         public function log_action(): void;
+         public function log_action($log_text): void;
  
 }

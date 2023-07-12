@@ -69,22 +69,29 @@ use secureDB\contracts\Logger\Logger as LoggerLogger;
          }
 
         /**
-         *  log an error to the error;
+         *  log an error to the error log file;
          * 
          */
-        public function log_error(): void
+        public function log_error($log_text): void
          {
-
+          //the path to the error log file
+           $log_path  = $this->get_error_log_path();
+           $log = $this->format_log($log_text);
+           $this->log($log_path , $log);
          }
 
+        
         /**
-         * log an action to the 
+         * log an action to the log file
          * 
          */
 
-         public function log_action(): void 
+         public function log_action($log_text): void 
          {
-
+          //the path to the action log
+          $log_path = $this->get_error_log_path();
+          $log = $this->format_log($log_text);
+          $this->log($log_path , $log);
          }
 
          /**
@@ -99,5 +106,15 @@ use secureDB\contracts\Logger\Logger as LoggerLogger;
                 fwrite($stream , $content , strlen($content));
                 fclose($stream);
           }
+
+          /***
+           * set the log text into a format that is
+           * suitable for logging
+           */
+
+           protected function format_log($log_text)
+           {
+                return "[{$this->get_time()}] $log_text \r\n";
+           }
 
   }

@@ -1,14 +1,12 @@
 {
         "debug_mode": 4 ,
 
-        "prepared_statement_enabled" : false ,
+        "prepared_statement" : false ,
 
         "log_path": " " ,
 
-        "default_log_path": "{ROOT}/log",
+        "defauflt_log_path": "{ROOT}/log",
 
-        "action_log_format" : "text" ,
-        
         "driver" : "mysql" ,
 
         "default_driver": "mysql" ,

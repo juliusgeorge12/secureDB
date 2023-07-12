@@ -1,23 +1,23 @@
 <?php
 
 use secureDB\app;
+use secureDB\components\Logger\Logger;
+use secureDB\components\Template_engine\template_engine;
 use secureDB\container\container;
-/*
+
 require_once  dirname(__DIR__) . "\\vendor\\autoload.php";
 
  try {
-        (new app(container::get_instance()));
+      $container = container::get_instance();
+        (new app($container));
+       // $logger = $container->resolve(Logger::class , ['path' => $container->get(template_engine::class)->get('log_path')]);
+        
  }
   catch(Exception $e){
         echo $e->getMessage();
   }
-  */
+   
 
-  $p = "C:/project/secureDB/error.log";
- // $file = fopen($p , 'a');
-  $txt = "Hello, how are you doing, i am trying again \r\n";
-  //fwrite($file , $txt , strlen($txt));
-  file_put_contents($p, $txt);
 
   
  
