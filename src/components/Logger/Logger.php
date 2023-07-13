@@ -21,7 +21,7 @@ use secureDB\contracts\Logger\Logger as LoggerLogger;
           */
           private $log_path = null;
 
-          public function __construct($path)
+          public function __construct(string $path)
           {
                 $this->set_path($path);
           }
@@ -89,7 +89,7 @@ use secureDB\contracts\Logger\Logger as LoggerLogger;
          public function log_action($log_text): void 
          {
           //the path to the action log
-          $log_path = $this->get_error_log_path();
+          $log_path = $this->get_action_log_path();
           $log = $this->format_log($log_text);
           $this->log($log_path , $log);
          }

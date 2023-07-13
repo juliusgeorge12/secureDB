@@ -1,19 +1,20 @@
 <?php
 
 use secureDB\app;
-use secureDB\components\Logger\Logger;
-use secureDB\components\Template_engine\template_engine;
 use secureDB\container\container;
+use secureDB\contracts\Logger\Logger;
+use secureDB\contracts\TemplateEngine\Template_engine;
 
 require_once  dirname(__DIR__) . "\\vendor\\autoload.php";
 
- try {
+  try {
       $container = container::get_instance();
         (new app($container));
-       // $logger = $container->resolve(Logger::class , ['path' => $container->get(template_engine::class)->get('log_path')]);
-        
- }
-  catch(Exception $e){
+        $logger = $container->resolve(Logger::class , ['path' => $container->get(Template_engine::class)->get('log_path')]);
+        $logger->log_error('there is an error');
+        $logger->log_action("i started the app");
+  }
+   catch(Exception $e){
         echo $e->getMessage();
   }
    

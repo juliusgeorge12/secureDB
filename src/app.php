@@ -72,7 +72,7 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
         $this->bind_root();
         $this->instantiate_config_parser();
         $this->parse_config();
-        $this->register_configurations();
+        $this->bind_configurations();
       }
 
      /***
@@ -130,25 +130,26 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
        }
 
         /**
-         * register the various configurations to the container
+         * bind the various configurations to the container
          * so that it can be resolved from the container
          * anywhere it is needed
          */
 
-         protected function register_configurations()
+         protected function bind_configurations()
          {
-            $this->register_debug_mode();
-            $this->register_log_path();
-            $this->register_prepared_statement_mode();
-            $this->register_driver();
+            $this->bind_debug_mode();
+            $this->bind_log_path();
+            $this->bind_prepared_statement_mode();
+            $this->bind_driver();
+            $this->bind_connections();
          }
 
          /**
-          * register the debug mode to the container 
+          * Bind the debug mode to the container 
           *
           */
 
-          protected function register_debug_mode()
+          protected function bind_debug_mode()
           {
             if(!isset($this->configurations["debug_mode"])){
               $debug_mode = 4;
@@ -160,11 +161,11 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
               });
           }
           /**
-          * register the log path to the container 
+          * bind the log path to the container 
           *
           */
 
-          protected function register_log_path()
+          protected function bind_log_path()
           {
             if(isset($this->configurations["log_path"]) && $this->configurations["log_path"] != ' ')
             {
@@ -185,11 +186,11 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
          }
 
           /**
-          * register the prepared_statement_enabled flag
+          * bind the prepared_statement_enabled flag
           * to the  container
           */
 
-          protected function register_prepared_statement_mode()
+          protected function bind_prepared_statement_mode()
           {
             if(isset($this->configurations["prepared_statement"]) && $this->configurations["prepared_statement"] != ' ')
             {
@@ -207,11 +208,11 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
           }
 
          /**
-          * register the sql driver type to the 
+          * bind the sql driver type to the 
           * container
           */
 
-          protected function register_driver()
+          protected function bind_driver()
           {
             if(isset($this->configurations["driver"]) && $this->configurations["driver"] != ' ')
             {
@@ -228,6 +229,27 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
             return $driver;
           });
          }
+
+         /**
+          *  Bind the connections array to the container
+          *
+          */
+
+          protected function bind_connections()
+          {
+            if(!isset($this->configurations["connections"]))
+            {
+              throw new Exception("There is no connections entry in the config.json file in the [{$this->template_engine->get('config_path')}]  folder");
+            } else if(empty($this->configurations["connections"]) || $this->configurations["connections"] === ' ')
+            {
+                throw new Exception("Connections can not be empty a default connection must be set");
+            } else {
+              $connections = $this->configurations["connections"];
+            }
+            $this->container->bind('connections', function($c) use ($connections){
+                   return $connections;
+            });
+          }
 
       
 

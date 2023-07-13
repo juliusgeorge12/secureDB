@@ -29,7 +29,6 @@ use secureDB\contracts\TemplateEngine\Template_engine as TemplateEngineContract;
          * 
          */
 
-        
          public function add(string $name, $value)
          {
                 if(isset($this->template[$name])){
@@ -106,7 +105,7 @@ use secureDB\contracts\TemplateEngine\Template_engine as TemplateEngineContract;
          * string
          */
 
-         public function get_searches(array $searches)
+         protected function get_searches(array $searches)
          {
                if(empty($searches)){
                 throw new Exception("array of searches can't be empty");

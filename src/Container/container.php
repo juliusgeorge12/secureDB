@@ -149,15 +149,15 @@ use TypeError;
                      //check if the concrete is a string
                      if(is_string($concrete)){
                         //get a reflection of the string
-                        try {
+                       try {
                         $own_reflector = new ReflectionClass($concrete);
                         // check if it is instantiable i.e it is a class
                        // return an instance of the class 
                        // if it is not a class return the string
-                      if($own_reflector->isInstantiable()){ return new $concrete; }
-
-                        } catch(Exception $e){
-                           return $concrete;
+                      if($own_reflector->isInstantiable()){ return new $concrete(...array_values($parameters)); }
+                       }
+                       catch(Exception $e){
+                          return $concrete;
                           }
                         }                               
                      return $container->resolve($abstract , $parameters);
@@ -333,7 +333,7 @@ use TypeError;
 
                    $this->resolved[] = $abstract;
                     array_pop($this->param_override);
-                   return $object;
+                    return $object;
                 }
 
                 /**
@@ -418,7 +418,7 @@ use TypeError;
 
                   $results = [];
 
-                  //loop through thr array of $dependencies and resolve them
+                  //loop through thr array of $dependencies and resolve them+
                   //one by one
                   foreach($dependencies  as $dependency){
                      
@@ -426,8 +426,7 @@ use TypeError;
                  // that instead as the value. Otherwise, we will continue with this run
                  // of resolutions and let reflection attempt to determine the result.
                     if ($this->has_parameter_override($dependency)) {
-                     
-                     $results[] = $this->get_parameter_override($dependency);
+                       $results[] = $this->get_parameter_override($dependency);
 
                        continue;
                       }
