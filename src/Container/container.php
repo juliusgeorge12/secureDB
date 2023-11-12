@@ -578,6 +578,7 @@ use TypeError;
                  * 
                  * check if the abstract exist in the container
                  * @param $id the abstract to check
+                 * @return bool
                  */
 
                  public function has($id)

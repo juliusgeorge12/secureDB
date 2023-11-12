@@ -3,9 +3,11 @@
 
 use Exception;
 use secureDB\components\config_parser\parser;
+use secureDB\components\DB\mysql_connection;
 use secureDB\components\Logger\Logger;
 use secureDB\components\Template_engine\template_engine;
 use secureDB\contracts\Container\container;
+use secureDB\contracts\DB\connection;
 use secureDB\contracts\Logger\Logger as LoggerContract;
 use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract;
 
@@ -93,6 +95,7 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
           $this->container->singleton(Template_engineContract::class , template_engine::class);
           $this->container->bind(parser::class);
           $this->container->bind(LoggerContract::class , Logger::class);
+          $this->container->bind(connection::class , mysql_connection::class);
        }
 
        /**
@@ -251,7 +254,6 @@ use secureDB\contracts\TemplateEngine\Template_engine as Template_engineContract
             });
           }
 
-      
 
        
   }

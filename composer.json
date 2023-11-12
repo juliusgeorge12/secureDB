@@ -6,8 +6,13 @@
     "autoload": {
         "psr-4": {
             "secureDB\\": "src/"
-        }
+        } 
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "Tests/"
+        }
+    } ,
     "authors": [
         {
             "name": "julius george",
@@ -15,5 +20,9 @@
         }
     ],
     "minimum-stability": "beta",
-    "require": {}
+    "require": {} ,
+    "require-dev" : 
+    {
+     "phpunit/phpunit": "^9.5.10"
+    }
 }
