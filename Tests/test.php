@@ -2,22 +2,24 @@
 
 use secureDB\app;
 use secureDB\container\container;
-/*
+use secureDB\contracts\DB\connection;
+use secureDB\contracts\Logger\Logger;
+use secureDB\contracts\TemplateEngine\Template_engine;
+
 require_once  dirname(__DIR__) . "\\vendor\\autoload.php";
 
- try {
-        (new app(container::get_instance()));
- }
-  catch(Exception $e){
+  try {
+      $container = container::get_instance();
+        (new app($container));
+        var_dump($container->resolve(connection::class ,
+         ['app' => $container , 'config'=> ['host' => 'localhost', 'db_username'=>'root' , 'db_password' => '', 'db_name' => 'test', 'port' => 3360]]
+         )->connect()->get_connection());
+  }
+   catch(Exception $e){
         echo $e->getMessage();
   }
-  */
+   
 
-  $p = "C:/project/secureDB/error.log";
- // $file = fopen($p , 'a');
-  $txt = "Hello, how are you doing, i am trying again \r\n";
-  //fwrite($file , $txt , strlen($txt));
-  file_put_contents($p, $txt);
 
   
  
